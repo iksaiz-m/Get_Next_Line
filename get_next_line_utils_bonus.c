@@ -1,16 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   get_next_line.c                                    :+:      :+:    :+:   */
+/*   get_next_line_utils_bonus.c                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: iksaiz-m <iksaiz-m@student.42urduliz.co    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/02/23 13:32:50 by iksaiz-m          #+#    #+#             */
-/*   Updated: 2024/02/28 19:02:00 by iksaiz-m         ###   ########.fr       */
+/*   Created: 2024/02/28 19:05:32 by iksaiz-m          #+#    #+#             */
+/*   Updated: 2024/02/29 16:59:02 by iksaiz-m         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "get_next_line.h"
+#include "get_next_line_bonus.h"
 
 void	*ft_calloc(size_t count, size_t size)
 {
@@ -90,52 +90,25 @@ char	*get_read_line(int fd, char *save)
 char	*get_next_line(int fd)
 {
 	char		*line;
-	static char	*save;
+	static char	*save[FD_OPEN];
 
-	if (fd < 0 || BUFFER_SIZE <= 0)
+	if (fd < 0 || BUFFER_SIZE <= 0 || FD_OPEN < fd)
 	{
-		if (save)
-			free(save);
+		if (save[fd])
+			free(save[fd]);
 		return (NULL);
 	}
-	if (!save)
+	if (!save[fd])
 	{
-		save = malloc(sizeof(char));
-		if (!save)
+		save[fd] = malloc(sizeof(char));
+		if (!save[fd])
 			return (NULL);
-		save[0] = '\0';
+		save[fd][0] = '\0';
 	}
-	save = get_read_line(fd, save);
-	if (save == NULL)
+	save[fd] = get_read_line(fd, save[fd]);
+	if (save[fd] == NULL)
 		return (NULL);
-	line = ft_get_one_line(save);
-	save = ft_get_rest_line(save);
+	line = ft_get_one_line(save[fd]);
+	save[fd] = ft_get_rest_line(save[fd]);
 	return (line);
 }
-
-/* int main()
-{
-    char *filename;
-    int fd;
-    
-    filename = "multiple_line_with_nl";
-    fd = open(filename, 0, O_RDONLY);
-    if (fd == -1)
-    {
-        printf("\nError Opening File\n");
-        exit(1);
-    }
-    else
-    {
-        printf("\nFile %s opened sucessfully!\n", filename);
-    }
-    printf("LINEA1:%s", get_next_line(fd));
-    printf("LINEA2:%s", get_next_line(fd));
-	printf("LINEA3:%s", get_next_line(fd));
-    printf("LINEA4:%s", get_next_line(fd));
-    printf("LINEA5:%s", get_next_line(fd));
-    printf("LINEA6:%s", get_next_line(fd));
-	printf("LINEA7:%s", get_next_line(fd));
-
-    return (0);
-} */
